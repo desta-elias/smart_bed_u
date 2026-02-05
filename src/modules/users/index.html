@@ -1,0 +1,182 @@
+#include <WiFi.h>
+#include <WebServer.h>
+#include "time.h"
+
+const char* ssid = "Ten-Toes";
+const char* password = "123123123";
+
+// NTP Server settings
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 10800; // Change this to your timezone (seconds from GMT)
+const int   daylightOffset_sec = 0;
+
+WebServer server(80);
+
+// Global variables for the schedule
+int schedM = 1;
+String schedD = "UP";
+int schedT = 5;
+String schedTime = ""; 
+bool schedActive = false;
+String lastStatus = "System Online";
+
+void handleRun() {
+  int m = server.arg("m").toInt();
+  String d = server.arg("d");
+  int t = server.arg("t").toInt();
+  String cmd = "M" + String(m) + " " + d + " " + String(t);
+  Serial2.println(cmd);
+  server.send(200, "text/plain; charset=utf-8", "Moving: Motor " + String(m));
+}
+
+void handleSchedule() {
+  schedM = server.arg("m").toInt();
+  schedD = server.arg("d");
+  schedT = server.arg("t").toInt();
+  schedTime = server.arg("time");
+  schedActive = true;
+  lastStatus = "Scheduled: M" + String(schedM) + " at " + schedTime;
+  server.send(200, "text/plain", lastStatus);
+}
+
+void handleRoot() {
+  String html = R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Hospital Bed</title>
+    <style>
+        :root { --primary: #00f2fe; --secondary: #4facfe; --error: #ff4b2b; --glass: rgba(255, 255, 255, 0.05); }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 95%; max-width: 500px; padding: 20px; }
+        .card { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 24px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .header { text-align: center; margin-bottom: 20px; }
+        #clock { font-size: 1.5em; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #94a3b8; font-size: 0.75em; text-transform: uppercase; }
+        select, input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; font-size: 1em; outline: none; margin-bottom: 15px; box-sizing: border-box;}
+        
+        .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .motor-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .btn-3d { width: 45%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: 0.1s; margin: 2px; }
+        .up { background: #0084a8; box-shadow: 0 4px 0 #00566e; }
+        .dn { background: #334155; box-shadow: 0 4px 0 #1e293b; }
+        .btn-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 transparent; }
+        
+        .btn-run { width: 100%; padding: 16px; border: none; border-radius: 12px; background: linear-gradient(145deg, #4facfe, #00f2fe); color: #001e3c; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #0084a8; }
+        .btn-stop { width: 100%; margin-top: 15px; padding: 12px; border: 2px solid var(--error); background: transparent; color: var(--error); border-radius: 12px; font-weight: bold; cursor: pointer; }
+        #status { margin-top: 20px; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.4); text-align: center; border-left: 4px solid var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div id="clock">00:00:00</div>
+            <h2 style="margin:0; letter-spacing:2px;">SMART BED PRO</h2>
+        </div>
+        
+        <div class="card">
+            <label>Manual Controler</label>
+            <div class="manual-grid">
+
+                <div class="motor-box"><div>HEAD</div><button class="btn-3d up" onclick="manual(1,'UP')">▲</button><button class="btn-3d dn" onclick="manual(1,'DN')">▼</button></div>
+                <div class="motor-box"><div>RIGHT-TILT</div><button class="btn-3d up" onclick="manual(2,'UP')">▲</button><button class="btn-3d dn" onclick="manual(2,'DN')">▼</button></div>
+                <div class="motor-box"><div>LEFT-TILT</div><button class="btn-3d up" onclick="manual(3,'UP')">▲</button><button class="btn-3d dn" onclick="manual(3,'DN')">▼</button></div>
+                <div class="motor-box"><div>LEG</div><button class="btn-3d up" onclick="manual(4,'UP')">▲</button><button class="btn-3d dn" onclick="manual(4,'DN')">▼</button></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>Real-Time Scheduler</label>
+            <select id="motor">
+                <option value="1">🟢 Head</option>
+                <option value="2">🟡 Right Tilt</option>
+                <option value="3">🔵 Left Tilt</option>
+                <option value="4">🟣 Leg</option>
+            </select>
+            <select id="dir">
+                <option value="UP">⬆️ EXTEND</option>
+                <option value="DN">⬇️ RETRACT</option>
+            </select>
+            <label>Execution Time (24h Format)</label>
+            <input id="schedTime" type="text" value="12:00:00">
+            <label>Move Duration (Sec)</label>
+            <input id="dur" type="number" value="5">
+            
+            <button class="btn-run" onclick="schedule()">SET SCHEDULE</button>
+            <button class="btn-stop" onclick="stopAll()">EMERGENCY STOP</button>
+        </div>
+
+        <div id="status">System Ready</div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
+        }
+        setInterval(updateClock, 1000);
+
+        function manual(m, d) { fetch(`/run?m=${m}&d=${d}&t=1`); }
+        
+        function schedule() {
+            const m = document.getElementById('motor').value;
+            const d = document.getElementById('dir').value;
+            const t = document.getElementById('dur').value;
+            const time = document.getElementById('schedTime').value;
+            fetch(`/sched?m=${m}&d=${d}&t=${t}&time=${time}`)
+                .then(r => r.text())
+                .then(msg => document.getElementById('status').innerHTML = msg);
+        }
+
+        function stopAll() { 
+            fetch('/stopall'); 
+            document.getElementById('status').innerHTML = "SYSTEM EMERGENCY STOP"; 
+        }
+    </script>
+</body>
+</html>
+)rawliteral";
+  server.send(200, "text/html; charset=utf-8", html);
+}
+
+void setup() {
+  Serial.begin(115200);
+  Serial2.begin(9600, SERIAL_8N1, 16, 17);
+  
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); }
+
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
+  server.on("/", handleRoot);
+  server.on("/run", handleRun);
+  server.on("/sched", handleSchedule);
+  server.on("/stopall", []() {
+    schedActive = false;
+    Serial2.println("STOPALL");
+    server.send(200, "text/plain", "HALTED");
+  });
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+
+  static unsigned long lastCheck = 0;
+  if (schedActive && millis() - lastCheck > 1000) {
+    lastCheck = millis();
+    struct tm timeinfo;
+    if (getLocalTime(&timeinfo)) {
+      char currentTime[9];
+      strftime(currentTime, sizeof(currentTime), "%H:%M:%S", &timeinfo);
+      if (String(currentTime) == schedTime) {
+        String cmd = "M" + String(schedM) + " " + schedD + " " + String(schedT);
+        Serial2.println(cmd);
+        schedActive = false;
+      }
+    }
+  }
+}
