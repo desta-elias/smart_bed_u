@@ -18,7 +18,7 @@ export async function seedBeds(dataSource: DataSource) {
   for (let i = 1; i <= 20; i++) {
     let room = 'WARD-1';
     let notes = 'Standard hospital bed';
-    
+
     if (i > 5 && i <= 10) room = 'WARD-2';
     else if (i > 10 && i <= 15) {
       room = 'ICU-1';

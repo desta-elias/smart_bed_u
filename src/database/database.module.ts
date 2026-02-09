@@ -13,7 +13,9 @@ import { seedBeds } from './seed-beds';
       useFactory: (config: ConfigService) => {
         const logger = new Logger('DatabaseConnection');
         const host = config.get<string>('DB_HOST') || '127.0.0.1';
-        const dbType = (config.get<string>('DB_TYPE') || 'postgres').toLowerCase();
+        const dbType = (
+          config.get<string>('DB_TYPE') || 'postgres'
+        ).toLowerCase();
         const defaultPort = dbType === 'mysql' ? '3306' : '5432';
         const port = parseInt(config.get<string>('DB_PORT') || defaultPort, 10);
         const username = config.get<string>('DB_USER');

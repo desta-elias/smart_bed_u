@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, FindOptionsWhere } from 'typeorm';
 import {
   Bed,
   BedStatus,
@@ -20,6 +20,7 @@ import {
   MovementType,
 } from './entities/bed-movement-history.entity';
 import { Patient } from '../patient/entities/patient.entity';
+import { User } from '../modules/users/user.entity';
 import { CreateBedDto } from './dto/create-bed.dto';
 import { UpdateBedDto } from './dto/update-bed.dto';
 import { ManualControlDto } from './dto/manual-control.dto';
@@ -50,7 +51,10 @@ export class BedService {
     private patientRepository: Repository<Patient>,
     private configService: ConfigService,
   ) {
-    this.arduinoUrl = this.configService.get<string>('ARDUINO_PC_URL', 'http://localhost:5000');
+    this.arduinoUrl = this.configService.get<string>(
+      'ARDUINO_PC_URL',
+      'http://localhost:5000',
+    );
   }
 
   async create(createBedDto: CreateBedDto): Promise<Bed> {
@@ -161,7 +165,9 @@ export class BedService {
       const next = updatePositionsDto.legPosition;
       bed.legPosition = next;
       const direction = this.getDirectionLabel(previous, next);
-      commands.push(this.buildCommand(MotorType.LEG, previous, next, direction));
+      commands.push(
+        this.buildCommand(MotorType.LEG, previous, next, direction),
+      );
     }
 
     const savedBed = await this.bedRepository.save(bed);
@@ -310,7 +316,12 @@ export class BedService {
       // HH:MM:SS format - schedule for today
       const [hours, minutes, seconds] = scheduleDto.scheduledFor.split(':');
       scheduledDate = new Date();
-      scheduledDate.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds || '0'), 0);
+      scheduledDate.setHours(
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds || '0'),
+        0,
+      );
     }
 
     if (scheduledDate < new Date()) {
@@ -321,7 +332,7 @@ export class BedService {
     const history = this.historyRepository.create({
       bed,
       bedId: bed.id,
-      user: { id: userId } as any,
+      user: { id: userId } as User,
       performedBy: userId,
       patient: bed.currentPatient || null,
       patientId: bed.currentPatient?.id || null,
@@ -346,7 +357,7 @@ export class BedService {
     const history = this.historyRepository.create({
       bed,
       bedId: bed.id,
-      user: { id: userId } as any,
+      user: { id: userId } as User,
       performedBy: userId,
       patient: bed.currentPatient || null,
       patientId: bed.currentPatient?.id || null,
@@ -378,7 +389,7 @@ export class BedService {
   }
 
   async getScheduledMovements(bedId?: number): Promise<BedMovementHistory[]> {
-    const where: any = {
+    const where: FindOptionsWhere<BedMovementHistory> = {
       movementType: MovementType.SCHEDULED,
       executed: false,
       scheduledFor: MoreThan(new Date()),
@@ -441,7 +452,7 @@ export class BedService {
     const history = this.historyRepository.create({
       bed,
       bedId: bed.id,
-      user: { id: userId } as any,
+      user: { id: userId } as User,
       performedBy: userId,
       patient: bed.currentPatient || null,
       patientId: bed.currentPatient?.id || null,
@@ -458,13 +469,13 @@ export class BedService {
     return this.historyRepository.save(history);
   }
 
-  private getPositionField(motorType: MotorType): string {
+  private getPositionField(motorType: MotorType): 'headPosition' | 'rightTiltPosition' | 'leftTiltPosition' | 'legPosition' {
     const fieldMap = {
       [MotorType.HEAD]: 'headPosition',
       [MotorType.RIGHT_TILT]: 'rightTiltPosition',
       [MotorType.LEFT_TILT]: 'leftTiltPosition',
       [MotorType.LEG]: 'legPosition',
-    };
+    } as const;
     return fieldMap[motorType];
   }
 
@@ -477,7 +488,8 @@ export class BedService {
     return {
       motorType,
       direction:
-        directionOverride ?? this.getDirectionLabel(previousPosition, newPosition),
+        directionOverride ??
+        this.getDirectionLabel(previousPosition, newPosition),
       mappedStep: this.mapPositionToStep(newPosition),
       previousPosition,
       newPosition,
@@ -528,7 +540,7 @@ export class BedService {
   ): number {
     // Simple calculation: ~10 units per second
     const change = duration * 10;
-    let newPosition =
+    const newPosition =
       direction === MotorDirection.UP
         ? currentPosition + change
         : currentPosition - change;

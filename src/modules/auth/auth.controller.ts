@@ -51,7 +51,7 @@ export class AuthController {
     FileInterceptor('profileImage', {
       storage: diskStorage({
         destination: './uploads/profile-images',
-        filename: (req: any, file, callback) => {
+        filename: (req: RequestWithUser, file, callback) => {
           // Include user ID in filename for user-specific storage
           const userId = req.user?.userId || 'unknown';
           const uniqueSuffix =
@@ -94,4 +94,3 @@ export class AuthController {
     return this.authService.getUserProfile(req.user.userId);
   }
 }
-

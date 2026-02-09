@@ -1,4 +1,12 @@
-import { IsEnum, IsInt, Min, Max, IsDateString, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+  IsDateString,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { MotorType, MotorDirection } from '../entities/bed.entity';
 
 export class ScheduleMovementDto {

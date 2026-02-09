@@ -22,6 +22,7 @@ import { ScheduleMovementDto } from './dto/schedule-movement.dto';
 import { AssignBedDto } from './dto/assign-bed.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
+import { RequestWithUser } from '../common/interfaces/request-with-user.interface';
 
 @Controller('beds')
 @UseGuards(JwtAuthGuard)
@@ -90,9 +91,9 @@ export class BedController {
   @Post(':id/unassign')
   @HttpCode(HttpStatus.OK)
   unassignBed(@Param('id') id: string) {
-    return this.bedService.findOne(+id).then((bed) =>
-      this.bedService.unassignBed(bed.bedNumber),
-    );
+    return this.bedService
+      .findOne(+id)
+      .then((bed) => this.bedService.unassignBed(bed.bedNumber));
   }
 
   @Post(':id/manual-control')
@@ -100,7 +101,7 @@ export class BedController {
   manualControl(
     @Param('id') id: string,
     @Body() controlDto: ManualControlDto,
-    @Request() req,
+    @Request() req: RequestWithUser,
   ) {
     return this.bedService.manualControl(+id, req.user.userId, controlDto);
   }
@@ -110,14 +111,14 @@ export class BedController {
   scheduleMovement(
     @Param('id') id: string,
     @Body() scheduleDto: ScheduleMovementDto,
-    @Request() req,
+    @Request() req: RequestWithUser,
   ) {
     return this.bedService.scheduleMovement(+id, req.user.userId, scheduleDto);
   }
 
   @Post(':id/emergency-stop')
   @HttpCode(HttpStatus.OK)
-  emergencyStop(@Param('id') id: string, @Request() req) {
+  emergencyStop(@Param('id') id: string, @Request() req: RequestWithUser) {
     return this.bedService.emergencyStop(+id, req.user.userId);
   }
 

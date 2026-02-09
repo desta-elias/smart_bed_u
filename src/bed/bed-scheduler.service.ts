@@ -46,13 +46,13 @@ export class BedSchedulerService {
           );
         } catch (error) {
           this.logger.error(
-            `Failed to execute movement ${movement.id}: ${error.message}`,
+            `Failed to execute movement ${movement.id}: ${(error as Error).message}`,
           );
         }
       }
     } catch (error) {
       this.logger.error(
-        `Error in scheduled movement handler: ${error.message}`,
+        `Error in scheduled movement handler: ${(error as Error).message}`,
       );
     }
   }

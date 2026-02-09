@@ -33,7 +33,7 @@ export class PatientsService {
         // Ensure the bed exists; create it if missing
         try {
           await this.bedService.findByBedNumber(createDto.bed);
-        } catch (error) {
+        } catch (_error) {
           await this.bedService.create({
             bedNumber: createDto.bed,
             room: createDto.room,
@@ -44,7 +44,7 @@ export class PatientsService {
         // If bed assignment fails, we should still return the patient
         // but you might want to handle this differently based on your requirements
         throw new BadRequestException(
-          `Patient created but bed assignment failed: ${error.message}`,
+          `Patient created but bed assignment failed: ${(error as Error).message}`,
         );
       }
     }

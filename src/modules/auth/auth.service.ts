@@ -3,7 +3,7 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
@@ -128,14 +128,14 @@ export class AuthService {
     const refreshExpires = rawRefresh && !Number.isNaN(Number(rawRefresh)) ? Number(rawRefresh) : rawRefresh || '7d';
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload as any, {
+      this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,
-        expiresIn: accessExpires as any,
-      } as any),
-      this.jwtService.signAsync(payload as any, {
+        expiresIn: accessExpires as JwtSignOptions['expiresIn'],
+      }),
+      this.jwtService.signAsync(payload, {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: refreshExpires as any,
-      } as any),
+        expiresIn: refreshExpires as JwtSignOptions['expiresIn'],
+      }),
     ]);
 
     await this.usersService.update(user.id, { refreshToken });
