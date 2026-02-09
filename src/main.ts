@@ -6,11 +6,13 @@ import helmet from 'helmet';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
+
 async function bootstrap() {
+ 
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Security: Helmet helps secure your apps by setting various HTTP headers
+  // Security: Helmet helps secure your apps by setting various HTTP headers desta..........
   app.use(helmet());
 
   // Serve static files from uploads directory
@@ -30,7 +32,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // No global prefix as it's handled by the frontend baseUrl
+  // No global prefix as it's handled by the frontend baseUrl  desta
   app.setGlobalPrefix('api');
 
   // Global validation pipe this updatei
