@@ -8,6 +8,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 
 async function bootstrap() {
+  const x = 10
+  console.log('Bootstrap started with x =', x);
  
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
