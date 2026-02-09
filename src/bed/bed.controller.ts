@@ -25,32 +25,36 @@ import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
 import { RequestWithUser } from '../common/interfaces/request-with-user.interface';
 
 @Controller('beds')
-@UseGuards(JwtAuthGuard)
 export class BedController {
   constructor(private readonly bedService: BedService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() createBedDto: CreateBedDto) {
     return this.bedService.create(createBedDto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.bedService.findAll();
   }
 
   @Get('available')
+  @UseGuards(JwtAuthGuard)
   findAvailable() {
     return this.bedService.findAvailable();
   }
 
   @Get('scheduled-movements')
+  @UseGuards(JwtAuthGuard)
   getScheduledMovements(@Query('bedId') bedId?: string) {
     const id = bedId ? parseInt(bedId) : undefined;
     return this.bedService.getScheduledMovements(id);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.bedService.findOne(+id);
   }
@@ -61,17 +65,20 @@ export class BedController {
   }
 
   @Get(':id/history')
+  @UseGuards(JwtAuthGuard)
   getBedHistory(@Param('id') id: string, @Query('limit') limit?: string) {
     const limitNum = limit ? parseInt(limit) : 50;
     return this.bedService.getBedHistory(+id, limitNum);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateBedDto: UpdateBedDto) {
     return this.bedService.update(+id, updateBedDto);
   }
 
   @Patch(':id/positions')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   updatePositions(
     @Param('id') id: string,
@@ -81,11 +88,13 @@ export class BedController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.bedService.remove(+id);
   }
 
   @Post('assign')
+  @UseGuards(JwtAuthGuard)
   assignBed(@Body() assignBedDto: AssignBedDto) {
     return this.bedService.assignBed(
       assignBedDto.patientId,
@@ -94,6 +103,7 @@ export class BedController {
   }
 
   @Post(':id/unassign')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   unassignBed(@Param('id') id: string) {
     return this.bedService
@@ -102,6 +112,7 @@ export class BedController {
   }
 
   @Post(':id/manual-control')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   manualControl(
     @Param('id') id: string,
@@ -112,6 +123,7 @@ export class BedController {
   }
 
   @Post(':id/schedule-movement')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   scheduleMovement(
     @Param('id') id: string,
@@ -122,12 +134,14 @@ export class BedController {
   }
 
   @Post(':id/emergency-stop')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   emergencyStop(@Param('id') id: string, @Request() req: RequestWithUser) {
     return this.bedService.emergencyStop(+id, req.user.userId);
   }
 
   @Post(':id/reset-emergency-stop')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   resetEmergencyStop(@Param('id') id: string) {
     return this.bedService.resetEmergencyStop(+id);
