@@ -55,6 +55,11 @@ export class BedController {
     return this.bedService.findOne(+id);
   }
 
+  @Get(':id/positions')
+  getPositions(@Param('id') id: string) {
+    return this.bedService.getBedPositions(+id);
+  }
+
   @Get(':id/history')
   getBedHistory(@Param('id') id: string, @Query('limit') limit?: string) {
     const limitNum = limit ? parseInt(limit) : 50;

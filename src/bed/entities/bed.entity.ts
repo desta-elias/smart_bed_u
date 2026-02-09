@@ -68,6 +68,18 @@ export class Bed {
   @Column({ type: 'integer', default: 0 })
   legPosition: number;
 
+  @Column({ type: 'varchar', length: 20, default: 'stop' })
+  headDirection: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'stop' })
+  rightTiltDirection: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'stop' })
+  leftTiltDirection: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'stop' })
+  legDirection: string;
+
   @Column({ type: 'boolean', default: false })
   emergencyStop: boolean;
 

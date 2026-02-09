@@ -138,6 +138,7 @@ export class BedService {
       const next = updatePositionsDto.headPosition;
       bed.headPosition = next;
       const direction = this.getDirectionLabel(previous, next);
+      bed.headDirection = direction.toLowerCase();
       commands.push(
         this.buildCommand(MotorType.HEAD, previous, next, direction),
       );
@@ -147,6 +148,7 @@ export class BedService {
       const next = updatePositionsDto.rightTiltPosition;
       bed.rightTiltPosition = next;
       const direction = this.getDirectionLabel(previous, next);
+      bed.rightTiltDirection = direction.toLowerCase();
       commands.push(
         this.buildCommand(MotorType.RIGHT_TILT, previous, next, direction),
       );
@@ -156,6 +158,7 @@ export class BedService {
       const next = updatePositionsDto.leftTiltPosition;
       bed.leftTiltPosition = next;
       const direction = this.getDirectionLabel(previous, next);
+      bed.leftTiltDirection = direction.toLowerCase();
       commands.push(
         this.buildCommand(MotorType.LEFT_TILT, previous, next, direction),
       );
@@ -165,6 +168,7 @@ export class BedService {
       const next = updatePositionsDto.legPosition;
       bed.legPosition = next;
       const direction = this.getDirectionLabel(previous, next);
+      bed.legDirection = direction.toLowerCase();
       commands.push(
         this.buildCommand(MotorType.LEG, previous, next, direction),
       );
@@ -172,6 +176,25 @@ export class BedService {
 
     const savedBed = await this.bedRepository.save(bed);
     return { bed: savedBed, commands };
+  }
+
+  async getBedPositions(id: number) {
+    const bed = await this.findOne(id);
+    return {
+      id: bed.id,
+      bedNumber: bed.bedNumber,
+      headPosition: bed.headPosition,
+      rightTiltPosition: bed.rightTiltPosition,
+      leftTiltPosition: bed.leftTiltPosition,
+      legPosition: bed.legPosition,
+      direction: {
+        head: bed.headDirection,
+        rightTilt: bed.rightTiltDirection,
+        leftTilt: bed.leftTiltDirection,
+        leg: bed.legDirection,
+      },
+      updatedAt: bed.updatedAt,
+    };
   }
 
   async remove(id: number): Promise<void> {
@@ -273,6 +296,14 @@ export class BedService {
     );
 
     bed[positionField] = newPosition;
+
+    // Update direction
+    const directionField = this.getDirectionField(controlDto.motorType);
+    bed[directionField] = this.getDirectionLabel(
+      currentPosition,
+      newPosition,
+    ).toLowerCase();
+
     await this.bedRepository.save(bed);
 
     // Log the movement
@@ -351,6 +382,13 @@ export class BedService {
   async emergencyStop(bedId: number, userId: number): Promise<Bed> {
     const bed = await this.findOne(bedId);
     bed.emergencyStop = true;
+
+    // Reset directions to stop
+    bed.headDirection = 'stop';
+    bed.rightTiltDirection = 'stop';
+    bed.leftTiltDirection = 'stop';
+    bed.legDirection = 'stop';
+
     await this.bedRepository.save(bed);
 
     // Log emergency stop
@@ -430,6 +468,14 @@ export class BedService {
     );
 
     bed[positionField] = newPosition;
+
+    // Update direction
+    const directionField = this.getDirectionField(history.motorType);
+    bed[directionField] = this.getDirectionLabel(
+      currentPosition,
+      newPosition,
+    ).toLowerCase();
+
     await this.bedRepository.save(bed);
 
     history.executed = true;
@@ -477,6 +523,22 @@ export class BedService {
       [MotorType.RIGHT_TILT]: 'rightTiltPosition',
       [MotorType.LEFT_TILT]: 'leftTiltPosition',
       [MotorType.LEG]: 'legPosition',
+    } as const;
+    return fieldMap[motorType];
+  }
+
+  private getDirectionField(
+    motorType: MotorType,
+  ):
+    | 'headDirection'
+    | 'rightTiltDirection'
+    | 'leftTiltDirection'
+    | 'legDirection' {
+    const fieldMap = {
+      [MotorType.HEAD]: 'headDirection',
+      [MotorType.RIGHT_TILT]: 'rightTiltDirection',
+      [MotorType.LEFT_TILT]: 'leftTiltDirection',
+      [MotorType.LEG]: 'legDirection',
     } as const;
     return fieldMap[motorType];
   }
