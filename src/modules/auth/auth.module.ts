@@ -19,8 +19,9 @@ import { ConfigService } from '../../config/config.service';
       useFactory: (config: ConfigService) => {
         return {
           secret: config.get('JWT_SECRET') || 'devsecret123',
-          signOptions: { 
-            expiresIn: (config.get('JWT_EXPIRES_IN') || '15m') as JwtSignOptions['expiresIn'],
+          signOptions: {
+            expiresIn: (config.get('JWT_EXPIRES_IN') ||
+              '15m') as JwtSignOptions['expiresIn'],
           },
         };
       },

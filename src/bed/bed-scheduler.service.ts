@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual } from 'typeorm';
-import { BedMovementHistory, MovementType } from './entities/bed-movement-history.entity';
+import {
+  BedMovementHistory,
+  MovementType,
+} from './entities/bed-movement-history.entity';
 import { BedService } from './bed.service';
 
 @Injectable()
@@ -19,7 +22,7 @@ export class BedSchedulerService {
   async handleScheduledMovements() {
     try {
       const now = new Date();
-      
+
       // Find all scheduled movements that should be executed now
       const dueMovements = await this.historyRepository.find({
         where: {
@@ -34,9 +37,7 @@ export class BedSchedulerService {
         return;
       }
 
-      this.logger.log(
-        `Executing ${dueMovements.length} scheduled movement(s)`,
-      );
+      this.logger.log(`Executing ${dueMovements.length} scheduled movement(s)`);
 
       for (const movement of dueMovements) {
         try {

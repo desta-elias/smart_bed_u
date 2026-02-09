@@ -56,7 +56,7 @@ export class AuthService {
     }
 
     const tokens = await this.generateTokens(user);
-    
+
     // Include user profile data (excluding sensitive info)
     return {
       ...tokens,
@@ -77,7 +77,7 @@ export class AuthService {
     }
 
     const tokens = await this.generateTokens(user);
-    
+
     // Include user profile data (excluding sensitive info)
     return {
       ...tokens,
@@ -124,8 +124,14 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const rawAccess = process.env.JWT_EXPIRES_IN;
     const rawRefresh = process.env.JWT_REFRESH_EXPIRES_IN;
-    const accessExpires = rawAccess && !Number.isNaN(Number(rawAccess)) ? Number(rawAccess) : rawAccess || '15m';
-    const refreshExpires = rawRefresh && !Number.isNaN(Number(rawRefresh)) ? Number(rawRefresh) : rawRefresh || '7d';
+    const accessExpires =
+      rawAccess && !Number.isNaN(Number(rawAccess))
+        ? Number(rawAccess)
+        : rawAccess || '15m';
+    const refreshExpires =
+      rawRefresh && !Number.isNaN(Number(rawRefresh))
+        ? Number(rawRefresh)
+        : rawRefresh || '7d';
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

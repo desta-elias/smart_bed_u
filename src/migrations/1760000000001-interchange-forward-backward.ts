@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InterchangeForwardBackward1760000000001
-  implements MigrationInterface
-{
+export class InterchangeForwardBackward1760000000001 implements MigrationInterface {
   name = 'InterchangeForwardBackward1760000000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

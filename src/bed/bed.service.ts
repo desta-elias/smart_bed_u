@@ -469,7 +469,9 @@ export class BedService {
     return this.historyRepository.save(history);
   }
 
-  private getPositionField(motorType: MotorType): 'headPosition' | 'rightTiltPosition' | 'leftTiltPosition' | 'legPosition' {
+  private getPositionField(
+    motorType: MotorType,
+  ): 'headPosition' | 'rightTiltPosition' | 'leftTiltPosition' | 'legPosition' {
     const fieldMap = {
       [MotorType.HEAD]: 'headPosition',
       [MotorType.RIGHT_TILT]: 'rightTiltPosition',
