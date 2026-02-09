@@ -132,10 +132,8 @@ export class BedService {
     if (updatePositionsDto.headPosition !== undefined) {
       const previous = bed.headPosition;
       const next = updatePositionsDto.headPosition;
-      bed.previousHeadPosition = previous;
       bed.headPosition = next;
       const direction = this.getDirectionLabel(previous, next);
-      bed.headDirection = direction;
       commands.push(
         this.buildCommand(MotorType.HEAD, previous, next, direction),
       );
@@ -143,10 +141,8 @@ export class BedService {
     if (updatePositionsDto.rightTiltPosition !== undefined) {
       const previous = bed.rightTiltPosition;
       const next = updatePositionsDto.rightTiltPosition;
-      bed.previousRightTiltPosition = previous;
       bed.rightTiltPosition = next;
       const direction = this.getDirectionLabel(previous, next);
-      bed.rightTiltDirection = direction;
       commands.push(
         this.buildCommand(MotorType.RIGHT_TILT, previous, next, direction),
       );
@@ -154,10 +150,8 @@ export class BedService {
     if (updatePositionsDto.leftTiltPosition !== undefined) {
       const previous = bed.leftTiltPosition;
       const next = updatePositionsDto.leftTiltPosition;
-      bed.previousLeftTiltPosition = previous;
       bed.leftTiltPosition = next;
       const direction = this.getDirectionLabel(previous, next);
-      bed.leftTiltDirection = direction;
       commands.push(
         this.buildCommand(MotorType.LEFT_TILT, previous, next, direction),
       );
@@ -165,10 +159,8 @@ export class BedService {
     if (updatePositionsDto.legPosition !== undefined) {
       const previous = bed.legPosition;
       const next = updatePositionsDto.legPosition;
-      bed.previousLegPosition = previous;
       bed.legPosition = next;
       const direction = this.getDirectionLabel(previous, next);
-      bed.legDirection = direction;
       commands.push(this.buildCommand(MotorType.LEG, previous, next, direction));
     }
 
@@ -274,7 +266,6 @@ export class BedService {
       controlDto.duration,
     );
 
-    this.setPreviousPositionField(bed, controlDto.motorType, currentPosition);
     bed[positionField] = newPosition;
     await this.bedRepository.save(bed);
 
@@ -427,7 +418,6 @@ export class BedService {
       history.duration,
     );
 
-    this.setPreviousPositionField(bed, history.motorType, currentPosition);
     bed[positionField] = newPosition;
     await this.bedRepository.save(bed);
 
@@ -476,22 +466,6 @@ export class BedService {
       [MotorType.LEG]: 'legPosition',
     };
     return fieldMap[motorType];
-  }
-
-  private setPreviousPositionField(
-    bed: Bed,
-    motorType: MotorType,
-    value: number,
-  ): void {
-    const previousFieldMap = {
-      [MotorType.HEAD]: 'previousHeadPosition',
-      [MotorType.RIGHT_TILT]: 'previousRightTiltPosition',
-      [MotorType.LEFT_TILT]: 'previousLeftTiltPosition',
-      [MotorType.LEG]: 'previousLegPosition',
-    } as const;
-
-    const field = previousFieldMap[motorType];
-    bed[field] = value;
   }
 
   private buildCommand(

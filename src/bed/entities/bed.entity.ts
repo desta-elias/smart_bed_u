@@ -28,6 +28,12 @@ export enum MotorDirection {
   DOWN = 'DOWN',
 }
 
+export enum BedDirection {
+  FORWARD = 'FORWARD',
+  BACKWARD = 'BACKWARD',
+  STOP = 'STOP',
+}
+
 @Entity('beds')
 export class Bed {
   @PrimaryGeneratedColumn()
