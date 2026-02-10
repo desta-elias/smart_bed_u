@@ -1,4 +1,22 @@
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, Max, Min, IsObject, IsIn } from 'class-validator';
+
+class DirectionDto {
+  @IsOptional()
+  @IsIn(['forward', 'backward', 'stop'])
+  head?: string;
+
+  @IsOptional()
+  @IsIn(['forward', 'backward', 'stop'])
+  rightTilt?: string;
+
+  @IsOptional()
+  @IsIn(['forward', 'backward', 'stop'])
+  leftTilt?: string;
+
+  @IsOptional()
+  @IsIn(['forward', 'backward', 'stop'])
+  leg?: string;
+}
 
 export class UpdateBedPositionsDto {
   @IsOptional()
@@ -24,4 +42,8 @@ export class UpdateBedPositionsDto {
   @Min(0)
   @Max(100)
   legPosition?: number;
+
+  @IsOptional()
+  @IsObject()
+  direction?: DirectionDto;
 }

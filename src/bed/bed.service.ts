@@ -137,41 +137,73 @@ export class BedService {
       const previous = bed.headPosition;
       const next = updatePositionsDto.headPosition;
       bed.headPosition = next;
-      const direction = this.getDirectionLabel(previous, next);
-      bed.headDirection = direction.toLowerCase();
-      commands.push(
-        this.buildCommand(MotorType.HEAD, previous, next, direction),
-      );
+      const providedDirection = updatePositionsDto.direction?.head;
+      if (providedDirection) {
+        bed.headDirection = providedDirection;
+        commands.push(
+          this.buildCommand(MotorType.HEAD, previous, next, this.mapStringToDirection(providedDirection)),
+        );
+      } else {
+        const direction = this.getDirectionLabel(previous, next);
+        bed.headDirection = direction.toLowerCase();
+        commands.push(
+          this.buildCommand(MotorType.HEAD, previous, next, direction),
+        );
+      }
     }
     if (updatePositionsDto.rightTiltPosition !== undefined) {
       const previous = bed.rightTiltPosition;
       const next = updatePositionsDto.rightTiltPosition;
       bed.rightTiltPosition = next;
-      const direction = this.getDirectionLabel(previous, next);
-      bed.rightTiltDirection = direction.toLowerCase();
-      commands.push(
-        this.buildCommand(MotorType.RIGHT_TILT, previous, next, direction),
-      );
+      const providedDirection = updatePositionsDto.direction?.rightTilt;
+      if (providedDirection) {
+        bed.rightTiltDirection = providedDirection;
+        commands.push(
+          this.buildCommand(MotorType.RIGHT_TILT, previous, next, this.mapStringToDirection(providedDirection)),
+        );
+      } else {
+        const direction = this.getDirectionLabel(previous, next);
+        bed.rightTiltDirection = direction.toLowerCase();
+        commands.push(
+          this.buildCommand(MotorType.RIGHT_TILT, previous, next, direction),
+        );
+      }
     }
     if (updatePositionsDto.leftTiltPosition !== undefined) {
       const previous = bed.leftTiltPosition;
       const next = updatePositionsDto.leftTiltPosition;
       bed.leftTiltPosition = next;
-      const direction = this.getDirectionLabel(previous, next);
-      bed.leftTiltDirection = direction.toLowerCase();
-      commands.push(
-        this.buildCommand(MotorType.LEFT_TILT, previous, next, direction),
-      );
+      const providedDirection = updatePositionsDto.direction?.leftTilt;
+      if (providedDirection) {
+        bed.leftTiltDirection = providedDirection;
+        commands.push(
+          this.buildCommand(MotorType.LEFT_TILT, previous, next, this.mapStringToDirection(providedDirection)),
+        );
+      } else {
+        const direction = this.getDirectionLabel(previous, next);
+        bed.leftTiltDirection = direction.toLowerCase();
+        commands.push(
+          this.buildCommand(MotorType.LEFT_TILT, previous, next, direction),
+        );
+      }
     }
     if (updatePositionsDto.legPosition !== undefined) {
       const previous = bed.legPosition;
       const next = updatePositionsDto.legPosition;
       bed.legPosition = next;
-      const direction = this.getDirectionLabel(previous, next);
-      bed.legDirection = direction.toLowerCase();
-      commands.push(
-        this.buildCommand(MotorType.LEG, previous, next, direction),
-      );
+      const providedDirection = updatePositionsDto.direction?.leg;
+      if (providedDirection) {
+        bed.legDirection = providedDirection;
+        commands.push(
+          this.buildCommand(MotorType.LEG, previous, next, this.mapStringToDirection(providedDirection)),
+        );
+      } else {
+        const direction = this.getDirectionLabel(previous, next);
+        bed.legDirection = direction.toLowerCase();
+        commands.push(
+          this.buildCommand(MotorType.LEG, previous, next, direction),
+        );
+      }
     }
 
     const savedBed = await this.bedRepository.save(bed);
@@ -571,6 +603,19 @@ export class BedService {
       return BedDirection.BACKWARD;
     }
     return BedDirection.STOP;
+  }
+
+  private mapStringToDirection(directionStr: string): BedCommandDirection {
+    switch (directionStr.toLowerCase()) {
+      case 'forward':
+        return BedDirection.FORWARD;
+      case 'backward':
+        return BedDirection.BACKWARD;
+      case 'stop':
+        return BedDirection.STOP;
+      default:
+        return BedDirection.STOP; // Default to stop if invalid
+    }
   }
 
   private mapPositionToStep(position: number): number | null {
