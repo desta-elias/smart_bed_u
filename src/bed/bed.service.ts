@@ -440,10 +440,6 @@ export class BedService {
         notes: 'Emergency stop activated',
       });
       await this.historyRepository.save(history);
-    } else {
-      this.logger.warn(
-        `Emergency stop for bed ${bedId} was triggered without authenticated user context`,
-      );
     }
 
     // Auto-reset after 5 seconds

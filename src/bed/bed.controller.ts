@@ -21,6 +21,7 @@ import { ManualControlDto } from './dto/manual-control.dto';
 import { ScheduleMovementDto } from './dto/schedule-movement.dto';
 import { AssignBedDto } from './dto/assign-bed.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
 import { RequestWithUser } from '../common/interfaces/request-with-user.interface';
 
@@ -139,6 +140,7 @@ export class BedController {
   }
 
   @Post(':id/emergency-stop')
+  @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   emergencyStop(@Param('id') id: string, @Request() req?: RequestWithUser) {
     return this.bedService.emergencyStop(+id, req?.user?.userId);
