@@ -79,7 +79,6 @@ export class BedController {
   }
 
   @Patch(':id/positions')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   updatePositions(
     @Param('id') id: string,
