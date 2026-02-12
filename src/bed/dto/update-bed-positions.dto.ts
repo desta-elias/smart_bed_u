@@ -28,7 +28,7 @@ export class UpdateBedPositionsDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Max(100)
+  @Max(100) 
   rightTiltPosition?: number;
 
   @IsOptional()

@@ -411,7 +411,10 @@ export class BedService {
     return this.historyRepository.save(history);
   }
 
-  async emergencyStop(bedId: number, userId: number): Promise<Bed> {
+  async emergencyStop(
+    bedId: number,
+    userId?: number,
+  ): Promise<{ emergencyStop: boolean }> {
     const bed = await this.findOne(bedId);
     bed.emergencyStop = true;
 
@@ -423,27 +426,39 @@ export class BedService {
 
     await this.bedRepository.save(bed);
 
-    // Log emergency stop
-    const history = this.historyRepository.create({
-      bed,
-      bedId: bed.id,
-      user: { id: userId } as User,
-      performedBy: userId,
-      patient: bed.currentPatient || null,
-      patientId: bed.currentPatient?.id || null,
-      movementType: MovementType.EMERGENCY_STOP,
-      executed: true,
-      notes: 'Emergency stop activated',
-    });
-    await this.historyRepository.save(history);
+    // Log emergency stop when a user context is available.
+    if (userId !== undefined) {
+      const history = this.historyRepository.create({
+        bed,
+        bedId: bed.id,
+        user: { id: userId } as User,
+        performedBy: userId,
+        patient: bed.currentPatient || null,
+        patientId: bed.currentPatient?.id || null,
+        movementType: MovementType.EMERGENCY_STOP,
+        executed: true,
+        notes: 'Emergency stop activated',
+      });
+      await this.historyRepository.save(history);
+    } else {
+      this.logger.warn(
+        `Emergency stop for bed ${bedId} was triggered without authenticated user context`,
+      );
+    }
 
-    return bed;
+    // Auto-reset after 5 seconds
+    setTimeout(async () => {
+      bed.emergencyStop = false;
+      await this.bedRepository.save(bed);
+      this.logger.log(`Emergency stop auto-reset for bed ${bedId}`);
+    }, 5000);
+
+    return { emergencyStop: true };
   }
 
-  async resetEmergencyStop(bedId: number): Promise<Bed> {
+  async getEmergencyStopStatus(bedId: number): Promise<{ emergencyStop: boolean }> {
     const bed = await this.findOne(bedId);
-    bed.emergencyStop = false;
-    return this.bedRepository.save(bed);
+    return { emergencyStop: bed.emergencyStop || false };
   }
 
   async getBedHistory(

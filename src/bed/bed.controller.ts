@@ -133,17 +133,14 @@ export class BedController {
     return this.bedService.scheduleMovement(+id, req.user.userId, scheduleDto);
   }
 
-  @Post(':id/emergency-stop')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  emergencyStop(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.bedService.emergencyStop(+id, req.user.userId);
+  @Get(':id/emergency-stop')
+  getEmergencyStopStatus(@Param('id') id: string) {
+    return this.bedService.getEmergencyStopStatus(+id);
   }
 
-  @Post(':id/reset-emergency-stop')
-  @UseGuards(JwtAuthGuard)
+  @Post(':id/emergency-stop')
   @HttpCode(HttpStatus.OK)
-  resetEmergencyStop(@Param('id') id: string) {
-    return this.bedService.resetEmergencyStop(+id);
+  emergencyStop(@Param('id') id: string, @Request() req?: RequestWithUser) {
+    return this.bedService.emergencyStop(+id, req?.user?.userId);
   }
 }
