@@ -65,10 +65,10 @@ export class BedMovementHistory {
   @Column({ type: 'int', nullable: true })
   duration: number; // in seconds
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'float', nullable: true })
   previousPosition: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'float', nullable: true })
   newPosition: number;
 
   @Column({ type: 'timestamp', nullable: true })

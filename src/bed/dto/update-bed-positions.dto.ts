@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, Max, Min, IsObject, IsIn } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min, IsObject, IsIn } from 'class-validator';
 
 class DirectionDto {
   @IsOptional()
@@ -20,25 +20,25 @@ class DirectionDto {
 
 export class UpdateBedPositionsDto {
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   @Max(100)
   headPosition?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   @Max(100)
   rightTiltPosition?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   @Max(100)
   leftTiltPosition?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   @Max(100)
   legPosition?: number;

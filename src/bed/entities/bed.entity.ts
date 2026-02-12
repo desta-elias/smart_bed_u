@@ -56,16 +56,16 @@ export class Bed {
   notes: string;
 
   // Motor positions (0-100 scale, 0 = fully retracted, 100 = fully extended)
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'float', default: 0 })
   headPosition: number;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'float', default: 0 })
   rightTiltPosition: number;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'float', default: 0 })
   leftTiltPosition: number;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'float', default: 0 })
   legPosition: number;
 
   @Column({ type: 'varchar', length: 20, default: 'stop' })
