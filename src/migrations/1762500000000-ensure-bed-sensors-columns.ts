@@ -1,7 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBedSensorsColumns1762000000000 implements MigrationInterface {
-  name = 'AddBedSensorsColumns1762000000000';
+export class EnsureBedSensorsColumns1762500000000
+  implements MigrationInterface
+{
+  name = 'EnsureBedSensorsColumns1762500000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
