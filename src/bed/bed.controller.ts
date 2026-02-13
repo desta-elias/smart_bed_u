@@ -23,6 +23,7 @@ import { AssignBedDto } from './dto/assign-bed.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
+import { UpdateBedSensorsDto } from './dto/update-bed-sensors.dto';
 import { RequestWithUser } from '../common/interfaces/request-with-user.interface';
 
 @Controller('beds')
@@ -85,6 +86,23 @@ export class BedController {
     @Body() updatePositionsDto: UpdateBedPositionsDto,
   ) {
     return this.bedService.updatePositions(+id, updatePositionsDto);
+  }
+
+  @Post(':id/sensors')
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  updateSensors(
+    @Param('id') id: string,
+    @Body() updateSensorsDto: UpdateBedSensorsDto,
+  ) {
+    return this.bedService.updateSensors(+id, updateSensorsDto);
+  }
+
+  @Get(':id/sensors')
+  @UseGuards(OptionalJwtAuthGuard)
+  getSensors(@Param('id') id: string) {
+    return this.bedService.getSensors(+id);
   }
 
   @Delete(':id')

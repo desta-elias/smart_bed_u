@@ -83,6 +83,15 @@ export class Bed {
   @Column({ type: 'boolean', default: false })
   emergencyStop: boolean;
 
+  @Column({ type: 'double precision', nullable: true })
+  sensorVibration: number | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  sensorTemperature: number | null;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  sensorTemperatureUnit: string | null;
+
   @OneToOne(() => Patient, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   currentPatient: Patient | null;

@@ -26,6 +26,7 @@ import { UpdateBedDto } from './dto/update-bed.dto';
 import { ManualControlDto } from './dto/manual-control.dto';
 import { ScheduleMovementDto } from './dto/schedule-movement.dto';
 import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
+import { UpdateBedSensorsDto } from './dto/update-bed-sensors.dto';
 
 export type BedCommandDirection = BedDirection;
 
@@ -36,6 +37,12 @@ export interface BedCommand {
   previousPosition: number;
   newPosition: number;
 }
+
+type BedWithSensors = Bed & {
+  sensorVibration: number | null;
+  sensorTemperature: number | null;
+  sensorTemperatureUnit: string | null;
+};
 
 @Injectable()
 export class BedService {
@@ -224,6 +231,28 @@ export class BedService {
         rightTilt: bed.rightTiltDirection,
         leftTilt: bed.leftTiltDirection,
         leg: bed.legDirection,
+      },
+      updatedAt: bed.updatedAt,
+    };
+  }
+
+  async updateSensors(id: number, updateSensorsDto: UpdateBedSensorsDto): Promise<Bed> {
+    const bed = (await this.findOne(id)) as BedWithSensors;
+    bed.sensorVibration = updateSensorsDto.sensors.vibration;
+    bed.sensorTemperature = updateSensorsDto.sensors.temperature;
+    bed.sensorTemperatureUnit = updateSensorsDto.sensors.unit ?? null;
+    return this.bedRepository.save(bed);
+  }
+
+  async getSensors(id: number) {
+    const bed = (await this.findOne(id)) as BedWithSensors;
+    return {
+      id: bed.id,
+      bedNumber: bed.bedNumber,
+      sensors: {
+        vibration: bed.sensorVibration,
+        temperature: bed.sensorTemperature,
+        unit: bed.sensorTemperatureUnit,
       },
       updatedAt: bed.updatedAt,
     };
