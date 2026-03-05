@@ -5,12 +5,18 @@ import { BedService } from './bed.service';
 import { BedController } from './bed.controller';
 import { BedSchedulerService } from './bed-scheduler.service';
 import { Bed } from './entities/bed.entity';
+import { BedManagementSecurity } from './entities/bed-management-security.entity';
 import { BedMovementHistory } from './entities/bed-movement-history.entity';
 import { Patient } from '../patient/entities/patient.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Bed, BedMovementHistory, Patient]),
+    TypeOrmModule.forFeature([
+      Bed,
+      BedManagementSecurity,
+      BedMovementHistory,
+      Patient,
+    ]),
     ScheduleModule.forRoot(),
   ],
   controllers: [BedController],

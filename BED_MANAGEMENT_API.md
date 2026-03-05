@@ -6,10 +6,17 @@ The Bed Management System allows doctors and nurses to control smart hospital be
 
 ## Authentication
 
-All endpoints require JWT authentication. Include the token in the Authorization header:
+Most endpoints require JWT authentication. Include the token in the Authorization header:
 ```
 Authorization: Bearer <your_jwt_token>
 ```
+
+## Bed Management PIN (4 digits)
+
+You can configure a 4-digit PIN to protect bed position updates.
+
+- When configured, `PATCH /beds/:id/positions` requires a `pin` field in the request body (4 digits).
+- When not configured, `PATCH /beds/:id/positions` works without a PIN.
 
 ## Base URL
 ```
@@ -165,6 +172,31 @@ Remove patient from bed and mark it as available.
 ---
 
 ## Bed Control Endpoints
+
+### Bed Management PIN
+
+**POST** `/beds/management-pin`
+
+Set/update the 4-digit management PIN (stored hashed in DB).
+
+**Request Body:**
+```json
+{ "pin": "1234" }
+```
+
+**POST** `/beds/management-pin/verify`
+
+Verify the PIN (use this when opening the Bed Management screen).
+
+**Request Body:**
+```json
+{ "pin": "1234" }
+```
+
+**Response:**
+```json
+{ "configured": true, "valid": true }
+```
 
 ### 9. Manual Control
 

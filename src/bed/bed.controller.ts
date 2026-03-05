@@ -25,10 +25,27 @@ import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { UpdateBedPositionsDto } from './dto/update-bed-positions.dto';
 import { UpdateBedSensorsDto } from './dto/update-bed-sensors.dto';
 import { RequestWithUser } from '../common/interfaces/request-with-user.interface';
+import { BedManagementPinDto } from './dto/bed-management-pin.dto';
 
 @Controller('beds')
 export class BedController {
   constructor(private readonly bedService: BedService) {}
+
+  @Post('management-pin')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  setBedManagementPin(@Body() dto: BedManagementPinDto) {
+    return this.bedService.setBedManagementPin(dto.pin);
+  }
+
+  @Post('management-pin/verify')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  verifyBedManagementPin(@Body() dto: BedManagementPinDto) {
+    return this.bedService.verifyBedManagementPin(dto.pin);
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -81,10 +98,11 @@ export class BedController {
 
   @Patch(':id/positions')
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  updatePositions(
+  async updatePositions(
     @Param('id') id: string,
     @Body() updatePositionsDto: UpdateBedPositionsDto,
   ) {
+    await this.bedService.requireValidBedManagementPin(updatePositionsDto.pin);
     return this.bedService.updatePositions(+id, updatePositionsDto);
   }
 

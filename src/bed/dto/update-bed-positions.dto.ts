@@ -1,4 +1,12 @@
-import { IsNumber, IsOptional, Max, Min, IsObject, IsIn } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
 
 class DirectionDto {
   @IsOptional()
@@ -20,6 +28,10 @@ class DirectionDto {
 
 export class UpdateBedPositionsDto {
   @IsOptional()
+  @Matches(/^\d{4}$/)
+  pin?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -28,7 +40,7 @@ export class UpdateBedPositionsDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Max(100) 
+  @Max(100)
   rightTiltPosition?: number;
 
   @IsOptional()

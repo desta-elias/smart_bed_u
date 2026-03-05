@@ -3,11 +3,13 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository, MoreThan, FindOptionsWhere } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import {
   Bed,
   BedStatus,
@@ -15,6 +17,7 @@ import {
   MotorDirection,
   BedDirection,
 } from './entities/bed.entity';
+import { BedManagementSecurity } from './entities/bed-management-security.entity';
 import {
   BedMovementHistory,
   MovementType,
@@ -52,6 +55,8 @@ export class BedService {
   constructor(
     @InjectRepository(Bed)
     private bedRepository: Repository<Bed>,
+    @InjectRepository(BedManagementSecurity)
+    private bedManagementSecurityRepository: Repository<BedManagementSecurity>,
     @InjectRepository(BedMovementHistory)
     private historyRepository: Repository<BedMovementHistory>,
     @InjectRepository(Patient)
@@ -62,6 +67,53 @@ export class BedService {
       'ARDUINO_PC_URL',
       'http://localhost:5000',
     );
+  }
+
+  private async getBedManagementSecurity(): Promise<BedManagementSecurity> {
+    const existing = await this.bedManagementSecurityRepository.findOneBy({
+      id: 1,
+    });
+    if (existing) return existing;
+
+    const created = this.bedManagementSecurityRepository.create({
+      id: 1,
+      pinHash: null,
+    });
+    return this.bedManagementSecurityRepository.save(created);
+  }
+
+  async setBedManagementPin(pin: string): Promise<{ configured: true }> {
+    const security = await this.getBedManagementSecurity();
+    const pinHash = await bcrypt.hash(pin, 10);
+    security.pinHash = pinHash;
+    await this.bedManagementSecurityRepository.save(security);
+    return { configured: true };
+  }
+
+  async verifyBedManagementPin(
+    pin: string,
+  ): Promise<{ configured: boolean; valid: boolean }> {
+    const security = await this.getBedManagementSecurity();
+    if (!security.pinHash) {
+      return { configured: false, valid: false };
+    }
+
+    const valid = await bcrypt.compare(pin, security.pinHash);
+    return { configured: true, valid };
+  }
+
+  async requireValidBedManagementPin(pin?: string): Promise<void> {
+    const security = await this.getBedManagementSecurity();
+    if (!security.pinHash) return;
+
+    if (!pin) {
+      throw new ForbiddenException('Bed management PIN required');
+    }
+
+    const valid = await bcrypt.compare(pin, security.pinHash);
+    if (!valid) {
+      throw new ForbiddenException('Invalid bed management PIN');
+    }
   }
 
   async create(createBedDto: CreateBedDto): Promise<Bed> {
